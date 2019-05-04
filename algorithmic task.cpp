@@ -3,7 +3,7 @@
 
 using namespace std;
 struct node{
-	int number;
+	int numberLabel;
 	int value;
 };
 bool is_prime (int a){
@@ -14,60 +14,53 @@ bool is_prime (int a){
 			return false;
 	return true;
 }
+int * reduceArray (int* input, int size){
+	int * output = new int [size];
+	for (int i=0;i<size;i++)
+		output[i]=input[i];
+	return output;
+}
+int getHashPosition (int numberLabel, node* array, int size){
+		hash<int> hash_function;
+		int tmp=hash_function(numberLabel)%size;
+		while (array[tmp].numberLabel!=numberLabel && array[tmp].value!=0){
+				tmp++;//linear conflict resolution
+				tmp=tmp%size;
+			}	
+		return tmp;
+}
 int * recive_function (int * A,int sizeA,int* B, int sizeB){
-	int sizeC = sizeB * 1.5; //sizeof hash array
-	node analiseB [sizeC];//create temporary array for result
+	int sizeC = sizeB * 1.5;	 //sizeof hash array
+	node analiseB [sizeC];		
 	for (int i=0;i<sizeC;i++){
-		analiseB[i].number=-1;
+		analiseB[i].numberLabel=-1;
 		analiseB[i].value = 0;
-	}
-	cout<<"Before hash\n";
-	hash<int> hash_function;//prepare hash fun
+	}		
 	int tmp;
 	//convert B into 
 	for(int i=0;i<sizeB;i++){
-		tmp=hash_function(B[i])%sizeC;
-		cout<<"i: "<<i<<" hash: "<<tmp<<" B[i] "<<B[i]<<endl;
-		while (analiseB[tmp].number!=B[i]&&analiseB[tmp].value!=0){
-				cout<<"   *"<<analiseB[tmp].number<<endl;
-				tmp++;//linear conflict resolution
-				tmp=tmp%sizeC;
-			}	
-			cout<<"i: "<<i<<" hash: "<<tmp<<" B[i] "<<B[i]<<endl;		
-			if (analiseB[tmp].value==0){//first contact with the number
-				analiseB[tmp].number = B[i];
+			tmp=getHashPosition (B[i],analiseB,sizeC);
+			if (analiseB[tmp].value==0){
+				analiseB[tmp].numberLabel = B[i];
 				analiseB[tmp].value ++;
 		}
 			else
-				analiseB[tmp].value++;//other situation
+				analiseB[tmp].value++;
 	}
 	int newArray = 0;
-	int *C= new int[sizeA];//temporary array with end number
+	int *C= new int[sizeA];//temporary array with end numberLabel
 	for (int i=0; i<sizeA;i++){
-		tmp=hash_function(A[i])%sizeC;
-		while (analiseB[tmp].number!=A[i]&&analiseB[tmp].value!=0)
-			tmp++;
-		cout<<"i: "<<i<<" hash: "<<tmp<<" C[i] "<<C[i]<<endl;
-		if(analiseB[tmp].number==A[i]){//number from A exist in B AND it is exist prime in B
+		tmp=getHashPosition (A[i],analiseB,sizeC);
+		if(analiseB[tmp].numberLabel==A[i]){
 			if(is_prime(analiseB[tmp].value)==false){
 				C[newArray]=A[i];
-				newArray++;
-			}	
+				newArray++;}	
 		}
 		else{
 			C[newArray]=A[i];
-			newArray++;
-		}
-	}
-	
-	int *finalC = new int [newArray];//prepare final array C
-	for (int i=0;i<newArray;i++){
-		finalC[i]=C[i];
-		cout<<finalC[i]<<endl;
-	}
-	
-	//return	
-	return finalC;			
+			newArray++;}
+	}	
+	return reduceArray(C,newArray);			
 }
 int main(){
 	int A[9]={2,3,9,2,5,1,3,7,10};
