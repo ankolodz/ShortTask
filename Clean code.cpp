@@ -18,74 +18,70 @@ vector<tm> parse (string input){
     vector<tm> endVector;
     input = input.erase(0,1);
     input = input.erase(input.length()-1,1);
-    tm parseEvent;
-    char *oneDate;
+    tm parsedDate;
+    char *singleDate;
     const char* inputChar = input.c_str();
     char * date = strdup (inputChar);
-    char signumParse [] =",";
-    oneDate = strtok (date,signumParse);
-    while (oneDate!=NULL){
-        string dateAfter = oneDate;
+    char delimeter [] =",";
+    singleDate = strtok (date,delimeter);
+    while (singleDate!=NULL){
+        string dateAfter = singleDate;
         if (dateAfter.length()!=21){
             cout<<"Incorect input: "<<dateAfter<<endl;
             exit (-1);
         }
-    parseEvent.tm_year=cutInt (dateAfter,1,4);
-    parseEvent.tm_mon=cutInt (dateAfter,6,7);
-    parseEvent.tm_mday=cutInt (dateAfter,9,10);
-    parseEvent.tm_hour=cutInt (dateAfter,12,13);
-    parseEvent.tm_min=cutInt (dateAfter,15,16);
-    parseEvent.tm_sec=cutInt (dateAfter,18,19);
-    endVector.push_back(parseEvent);
-    oneDate = strtok (NULL,signumParse);     
+    parsedDate.tm_year=cutInt (dateAfter,1,4);
+    parsedDate.tm_mon=cutInt (dateAfter,6,7);
+    parsedDate.tm_mday=cutInt (dateAfter,9,10);
+    parsedDate.tm_hour=cutInt (dateAfter,12,13);
+    parsedDate.tm_min=cutInt (dateAfter,15,16);
+    parsedDate.tm_sec=cutInt (dateAfter,18,19);
+    endVector.push_back(parsedDate);
+    singleDate = strtok (NULL,delimeter);     
     }
-    free(oneDate);
+    free(singleDate);
     free(date);
     return endVector; 
     
 }
-bool isNewSesion (tm lastLog, tm actuallLog){
-    int beetwenTime;
-    beetwenTime = mktime(&lastLog)-mktime(&actuallLog);
-    if (beetwenTime <= 30*60)
+bool isNewSesion (tm lastLog, tm currentLog){
+    int timeDiff;
+    timeDiff = mktime(&lastLog)-mktime(&currentLog);
+    if (timeDiff <= 30*60)
         return false;
     return true;
 }
-bool isNewDay (tm lastLog, tm actuallLog){
-        if (actuallLog.tm_year==lastLog.tm_year && 
-            actuallLog.tm_mon==lastLog.tm_mon &&
-            actuallLog.tm_mday ==lastLog.tm_mday)
+bool isNewDay (tm lastLog, tm currentLog){
+        if (currentLog.tm_year==lastLog.tm_year && 
+            currentLog.tm_mon==lastLog.tm_mon &&
+            currentLog.tm_mday ==lastLog.tm_mday)
             return false;
         return true;
 }
-bool isLessThreeDays (tm lastLog, tm actuallLog){
-    int beetwenTime;
-    beetwenTime = mktime(&actuallLog)-mktime(&lastLog);
-    if (beetwenTime<=THREE_DAYS)
-        return true;
-    return false;
+bool isLessThanTreeDays (tm lastLog, tm currentLog){
+    int timeDiff;
+    timeDiff = mktime(&currentLog)-mktime(&lastLog);
+    return (timeDiff<=THREE_DAYS);
 
 }
 bool askQuestion (string input){
-    vector <tm> listOfDate = parse(input);
-    tm lastLog, lastLog;
-    int size = listOfDate.size() -1;
-    int sesion_log=1, days_log=1;
+    vector <tm> datesVector = parse(input);
+    tm lastLog, currentLog;
+    int size = datesVector.size() -1;
+    int session_log=1, days_log=1;
 
-    lastLog = listOfDate[size];
-    lastLog = listOfDate[size];
-    while (size>=0 && isLessThreeDays(lastLog,lastLog)==true){
-        if (isNewSesion(lastLog,lastLog)==true)
-            sesion_log++;
-        if (isNewDay(lastLog,lastLog)==true)
+    lastLog = datesVector[size];
+    currentLog = datesVector[size];
+    while (size>=0 && isLessThanTreeDays(lastLog,currentLog)==true){
+        if (isNewSesion(lastLog,currentLog)==true)
+            session_log++;
+        if (isNewDay(lastLog,currentLog)==true)
             days_log++;
-        lastLog=lastLog;
+        lastLog=currentLog;
         size--;
-        lastLog = listOfDate[size];        
+        currentLog = datesVector[size];        
     }
-    if (sesion_log>=6&& days_log==3)
-        return true;
-    return false;
+    return (session_log>=6&& days_log==3);
 
 }
 int main(){
