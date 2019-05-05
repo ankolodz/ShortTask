@@ -41,7 +41,7 @@ vector<tm> parse (string input){
 }
 bool isNewSession (tm lastLog, tm currentLog){
     int timeDiff = mktime(&lastLog)-mktime(&currentLog);
-    return !(timeDiff <= 30*60);
+    return timeDiff > 30*60;
 }
 bool isNewDay (tm lastLog, tm currentLog){
     return !(currentLog.tm_year==lastLog.tm_year && 
