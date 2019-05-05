@@ -3,8 +3,8 @@
 
 using namespace std;
 struct node{
-	int numberLabel;
 	int value;
+	int numberOfOccurences;
 };
 bool is_prime (int a){
 	if (a<2)
@@ -20,10 +20,10 @@ int * reduceArray (int* input, int size){
 		output[i]=input[i];
 	return output;
 }
-int getHashPosition (int numberLabel, node* array, int size){
+int getHashPosition (int value, node* array, int size){
 		hash<int> hash_function;
-		int tmp=hash_function(numberLabel)%size;
-		while (array[tmp].numberLabel!=numberLabel && array[tmp].value!=0){
+		int tmp=hash_function(value)%size;
+		while (array[tmp].value!=value && array[tmp].numberOfOccurences!=0){
 				tmp++;//linear conflict resolution
 				tmp=tmp%size;
 			}	
@@ -33,26 +33,26 @@ int * recive_function (int * A,int sizeA,int* B, int sizeB){
 	int sizeC = sizeB * 1.5;	 //sizeof hash array
 	node analiseB [sizeC];		
 	for (int i=0;i<sizeC;i++){
-		analiseB[i].numberLabel=-1;
-		analiseB[i].value = 0;
+		analiseB[i].value=-1;
+		analiseB[i].numberOfOccurences = 0;
 	}		
 	int tmp;
 	//convert B into 
 	for(int i=0;i<sizeB;i++){
 			tmp=getHashPosition (B[i],analiseB,sizeC);
-			if (analiseB[tmp].value==0){
-				analiseB[tmp].numberLabel = B[i];
-				analiseB[tmp].value ++;
+			if (analiseB[tmp].numberOfOccurences==0){
+				analiseB[tmp].value = B[i];
+				analiseB[tmp].numberOfOccurences ++;
 		}
 			else
-				analiseB[tmp].value++;
+				analiseB[tmp].numberOfOccurences++;
 	}
 	int newArray = 0;
-	int *C= new int[sizeA];//temporary array with end numberLabel
+	int *C= new int[sizeA];//temporary array with end value
 	for (int i=0; i<sizeA;i++){
 		tmp=getHashPosition (A[i],analiseB,sizeC);
-		if(analiseB[tmp].numberLabel==A[i]){
-			if(is_prime(analiseB[tmp].value)==false){
+		if(analiseB[tmp].value==A[i]){
+			if(is_prime(analiseB[tmp].numberOfOccurences)==false){
 				C[newArray]=A[i];
 				newArray++;}	
 		}
