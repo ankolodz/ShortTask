@@ -14,8 +14,7 @@ int cutInt (string input, int start, int length){
 }
 vector<tm> parse (string input){
     vector<tm> endVector;
-    input = input.erase(0,1);
-    input = input.erase(input.length()-1,1);
+    input = input.substr (1,input.length()-2);
     tm parsedDate;
     char *singleDate;
     const char* inputChar = input.c_str();
@@ -43,9 +42,7 @@ vector<tm> parse (string input){
 }
 bool isNewSesion (tm lastLog, tm currentLog){
     int timeDiff = mktime(&lastLog)-mktime(&currentLog);
-    if (timeDiff <= 30*60)
-        return false;
-    return true;
+    return !(timeDiff <= 30*60);
 }
 bool isNewDay (tm lastLog, tm currentLog){
     if (currentLog.tm_year==lastLog.tm_year && 
@@ -59,28 +56,28 @@ bool isLessThanTreeDays (tm lastLog, tm currentLog){
     return (timeDiff<=THREE_DAYS);
 
 }
-bool askQuestion (string input){
+bool sendRequestToClient (string input){
     vector <tm> datesVector = parse(input);
     tm lastLog, currentLog;
     int size = datesVector.size() -1;
-    int session_log=1, days_log=1;
+    int sessionLog=1, days_log=1;
 
     lastLog = datesVector[size];
     currentLog = datesVector[size];
-    while (size>=0 && isLessThanTreeDays(lastLog,currentLog)==true){
-        if (isNewSesion(lastLog,currentLog)==true)
-            session_log++;
-        if (isNewDay(lastLog,currentLog)==true)
+    while (size>=0 && isLessThanTreeDays(lastLog,currentLog)){
+        if (isNewSesion(lastLog,currentLog))
+            sessionLog++;
+        if (isNewDay(lastLog,currentLog))
             days_log++;
         lastLog=currentLog;
         size--;
         currentLog = datesVector[size];        
     }
-    return (session_log>=6&& days_log==3);
+    return sessionLog>=6 && days_log==3;
 
 }
 int main(){
     string input ="['2017-03-10 08:13:11','2017-03-10 19:01:27','2017-03-11 07:35:55','2017-03-11 16:15:11','2017-03-12 08:01:41','2017-03-12 17:19:08']";
-    cout<<askQuestion (input);
+    cout<<sendRequestToClient (input);
 
 }
