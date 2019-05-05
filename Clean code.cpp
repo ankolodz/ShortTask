@@ -44,23 +44,23 @@ vector<tm> parse (string input){
     return endVector; 
     
 }
-bool isNewSesion (tm ActuallLog, tm LastLog){
+bool isNewSesion (tm lastLog, tm actuallLog){
     int beetwenTime;
-    beetwenTime = mktime(&ActuallLog)-mktime(&LastLog);
+    beetwenTime = mktime(&lastLog)-mktime(&actuallLog);
     if (beetwenTime <= 30*60)
         return false;
     return true;
 }
-bool isNewDay (tm ActuallLog, tm LastLog){
-        if (LastLog.tm_year==ActuallLog.tm_year && 
-            LastLog.tm_mon==ActuallLog.tm_mon &&
-            LastLog.tm_mday ==ActuallLog.tm_mday)
+bool isNewDay (tm lastLog, tm actuallLog){
+        if (actuallLog.tm_year==lastLog.tm_year && 
+            actuallLog.tm_mon==lastLog.tm_mon &&
+            actuallLog.tm_mday ==lastLog.tm_mday)
             return false;
         return true;
 }
-bool isLessThreeDays (tm ActuallLog, tm LastLog){
+bool isLessThreeDays (tm lastLog, tm actuallLog){
     int beetwenTime;
-    beetwenTime = mktime(&LastLog)-mktime(&ActuallLog);
+    beetwenTime = mktime(&actuallLog)-mktime(&lastLog);
     if (beetwenTime<=THREE_DAYS)
         return true;
     return false;
@@ -68,20 +68,20 @@ bool isLessThreeDays (tm ActuallLog, tm LastLog){
 }
 bool askQuestion (string input){
     vector <tm> listOfDate = parse(input);
-    tm lastLog, iterator;
+    tm lastLog, lastLog;
     int size = listOfDate.size() -1;
     int sesion_log=1, days_log=1;
 
     lastLog = listOfDate[size];
-    iterator = listOfDate[size];
-    while (size>=0 && isLessThreeDays(lastLog,iterator)==true){
-        if (isNewSesion(lastLog,iterator)==true)
+    lastLog = listOfDate[size];
+    while (size>=0 && isLessThreeDays(lastLog,lastLog)==true){
+        if (isNewSesion(lastLog,lastLog)==true)
             sesion_log++;
-        if (isNewDay(lastLog,iterator)==true)
+        if (isNewDay(lastLog,lastLog)==true)
             days_log++;
-        lastLog=iterator;
+        lastLog=lastLog;
         size--;
-        iterator = listOfDate[size];        
+        lastLog = listOfDate[size];        
     }
     if (sesion_log>=6&& days_log==3)
         return true;
