@@ -3,110 +3,78 @@
 #include<cstring>
 #include<cstdio>
 #include<vector>
-//#include<string.h>
+#include<ctime>
+#define THREE_DAYS  3600*24*3
 
 using namespace std;
-struct date{
-    int year;
-    int month;
-    int day;
-    int sesion;
-};
-struct last{
-    date lastdate;
-    int hour;
-    int min;
-    int sec;
-};
-int cutStrToInt (string input, int start, int stop){
+
+int cutInt (string input, int start, int stop){
     string tmp ="";
     tmp.append(input,start,stop);
     const char* finish = tmp.c_str();
     return atoi(finish);
 }
-vector<last> parser (string input){
-    vector<last> endVector;// = new vector<last>;
+vector<tm> parse (string input){
+    vector<tm> endVector;
     input = input.erase(0,1);
     input = input.erase(input.length()-1,1);
-    last finished;
+    tm parseEvent;
     char *oneDate;
-    const char* constArray = input.c_str();
-    char * array = strdup (constArray);
-    char kolektor [] =",";
-    oneDate = strtok (array,kolektor);
+    const char* inputChar = input.c_str();
+    char * date = strdup (inputChar);
+    char signumParse [] =",";
+    oneDate = strtok (date,signumParse);
     while (oneDate!=NULL){
         string dateAfter = oneDate;
         if (dateAfter.length()!=21){
             cout<<"Incorect input: "<<dateAfter<<endl;
             exit (-1);
         }
-    finished.lastdate.year=cutStrToInt (dateAfter,1,4);
-    finished.lastdate.month=cutStrToInt (dateAfter,6,7);
-    finished.lastdate.day=cutStrToInt (dateAfter,9,10);
-    finished.hour=cutStrToInt (dateAfter,12,13);
-    finished.min=cutStrToInt (dateAfter,15,16);
-    finished.sec=cutStrToInt (dateAfter,18,19);
-    endVector.push_back(finished);
-    oneDate = strtok (NULL,kolektor);     
+    parseEvent.tm_year=cutInt (dateAfter,1,4);
+    parseEvent.tm_mon=cutInt (dateAfter,6,7);
+    parseEvent.tm_mday=cutInt (dateAfter,9,10);
+    parseEvent.tm_hour=cutInt (dateAfter,12,13);
+    parseEvent.tm_min=cutInt (dateAfter,15,16);
+    parseEvent.tm_sec=cutInt (dateAfter,18,19);
+    endVector.push_back(parseEvent);
+    oneDate = strtok (NULL,signumParse);     
     }
     free(oneDate);
-    free(array);
+    free(date);
     return endVector; 
     
 }
-bool isNewSesion (last ActuallLog, last LastLog){
-    if (LastLog.lastdate.year==ActuallLog.lastdate.year && 
-        LastLog.lastdate.month==ActuallLog.lastdate.month &&
-        LastLog.lastdate.day ==ActuallLog.lastdate.day){
-            int pauseTime = ActuallLog.hour*3600;
-                pauseTime += ActuallLog.min*60;
-                pauseTime += ActuallLog.sec;
-                pauseTime -= LastLog.hour*3600;
-                pauseTime -= LastLog.min*60;
-                pauseTime -= LastLog.sec;
-        if (pauseTime <= 30 * 60)
-            return false;
-        }
+bool isNewSesion (tm ActuallLog, tm LastLog){
+    int beetwenTime;
+    beetwenTime = mktime(&ActuallLog)-mktime(&LastLog);
+    if (beetwenTime <= 30*60)
+        return false;
     return true;
 }
-bool isNewDay (last LastLog, last ActuallLog){
-        if (LastLog.lastdate.year==ActuallLog.lastdate.year && 
-        LastLog.lastdate.month==ActuallLog.lastdate.month &&
-        LastLog.lastdate.day ==ActuallLog.lastdate.day)
+bool isNewDay (tm ActuallLog, tm LastLog){
+        if (LastLog.tm_year==ActuallLog.tm_year && 
+            LastLog.tm_mon==ActuallLog.tm_mon &&
+            LastLog.tm_mday ==ActuallLog.tm_mday)
             return false;
         return true;
 }
-bool isThreeDays (last ActuallLog, last LastLog){
-    int years = LastLog.lastdate.year - ActuallLog.lastdate.year;
-    int months = LastLog.lastdate.month - ActuallLog.lastdate.month;
-    int days = LastLog.lastdate.day - ActuallLog.lastdate.day;
-    if (days <=0 && months == 0 && years == 0)
-        return true;
-    if (days == 28 && months == -11 && years == -1 )//new year
-        return true;
-    if (days == 27 && months == -1 && years == 0 && //month with 30 days
-    ((LastLog.lastdate.month)==4||
-    (LastLog.lastdate.month)==6||
-    (LastLog.lastdate.month)==9||
-    (LastLog.lastdate.month)==11))
-        return true;
-    if (days == 24 && months == -1 && years == 0 && //February only 27 days 
-    (LastLog.lastdate.month)==2)
-        return true;
-    if (days == 28 && months == -1 && years == 0) // month with 31 days
+bool isLessThreeDays (tm ActuallLog, tm LastLog){
+    int beetwenTime;
+    beetwenTime = mktime(&LastLog)-mktime(&ActuallLog);
+    if (beetwenTime<=THREE_DAYS)
         return true;
     return false;
 
 }
-bool decideFunction (string input){
-    vector <last> listOfDate = parser(input);
-    last lastLog, iterator;
+bool askQuestion (string input){
+    vector <tm> listOfDate = parse(input);
+    tm lastLog, iterator;
     int size = listOfDate.size() -1;
     int sesion_log=1, days_log=1;
 
     lastLog = listOfDate[size];
     iterator = listOfDate[size];
-    while (size>=0 && isThreeDays(lastLog,iterator)==true){
+    while (size>=0 && isLessThreeDays(lastLog,iterator)==true){
         if (isNewSesion(lastLog,iterator)==true)
             sesion_log++;
         if (isNewDay(lastLog,iterator)==true)
@@ -122,6 +90,6 @@ bool decideFunction (string input){
 }
 int main(){
     string input ="['2017-03-10 08:13:11','2017-03-10 19:01:27','2017-03-11 07:35:55','2017-03-11 16:15:11','2017-03-12 08:01:41','2017-03-12 17:19:08']";
-    cout<<decideFunction (input);
+    cout<<askQuestion (input);
 
 }
