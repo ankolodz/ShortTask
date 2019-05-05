@@ -8,11 +8,9 @@
 
 using namespace std;
 
-int cutInt (string input, int start, int stop){
-    string tmp ="";
-    tmp.append(input,start,stop);
-    const char* finish = tmp.c_str();
-    return atoi(finish);
+int cutInt (string input, int start, int length){
+    string tmp =input.substr(start,length);
+    return atoi(tmp.c_str());
 }
 vector<tm> parse (string input){
     vector<tm> endVector;
@@ -22,8 +20,7 @@ vector<tm> parse (string input){
     char *singleDate;
     const char* inputChar = input.c_str();
     char * date = strdup (inputChar);
-    char delimeter [] =",";
-    singleDate = strtok (date,delimeter);
+    singleDate = strtok (date,",");
     while (singleDate!=NULL){
         string dateAfter = singleDate;
         if (dateAfter.length()!=21){
@@ -31,13 +28,13 @@ vector<tm> parse (string input){
             exit (-1);
         }
     parsedDate.tm_year=cutInt (dateAfter,1,4);
-    parsedDate.tm_mon=cutInt (dateAfter,6,7);
-    parsedDate.tm_mday=cutInt (dateAfter,9,10);
-    parsedDate.tm_hour=cutInt (dateAfter,12,13);
-    parsedDate.tm_min=cutInt (dateAfter,15,16);
-    parsedDate.tm_sec=cutInt (dateAfter,18,19);
+    parsedDate.tm_mon=cutInt (dateAfter,6,2);
+    parsedDate.tm_mday=cutInt (dateAfter,9,2);
+    parsedDate.tm_hour=cutInt (dateAfter,12,2);
+    parsedDate.tm_min=cutInt (dateAfter,15,2);
+    parsedDate.tm_sec=cutInt (dateAfter,18,2);
     endVector.push_back(parsedDate);
-    singleDate = strtok (NULL,delimeter);     
+    singleDate = strtok (NULL,",");     
     }
     free(singleDate);
     free(date);
@@ -45,8 +42,7 @@ vector<tm> parse (string input){
     
 }
 bool isNewSesion (tm lastLog, tm currentLog){
-    int timeDiff;
-    timeDiff = mktime(&lastLog)-mktime(&currentLog);
+    int timeDiff = mktime(&lastLog)-mktime(&currentLog);
     if (timeDiff <= 30*60)
         return false;
     return true;
@@ -55,12 +51,11 @@ bool isNewDay (tm lastLog, tm currentLog){
         if (currentLog.tm_year==lastLog.tm_year && 
             currentLog.tm_mon==lastLog.tm_mon &&
             currentLog.tm_mday ==lastLog.tm_mday)
-            return false;
+                return false;
         return true;
 }
 bool isLessThanTreeDays (tm lastLog, tm currentLog){
-    int timeDiff;
-    timeDiff = mktime(&currentLog)-mktime(&lastLog);
+    int timeDiff = mktime(&currentLog)-mktime(&lastLog);
     return (timeDiff<=THREE_DAYS);
 
 }
