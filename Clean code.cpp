@@ -48,11 +48,11 @@ bool isNewSesion (tm lastLog, tm currentLog){
     return true;
 }
 bool isNewDay (tm lastLog, tm currentLog){
-        if (currentLog.tm_year==lastLog.tm_year && 
-            currentLog.tm_mon==lastLog.tm_mon &&
-            currentLog.tm_mday ==lastLog.tm_mday)
-                return false;
-        return true;
+    if (currentLog.tm_year==lastLog.tm_year && 
+        currentLog.tm_mon==lastLog.tm_mon &&
+        currentLog.tm_mday ==lastLog.tm_mday)
+            return false;
+    return true;
 }
 bool isLessThanTreeDays (tm lastLog, tm currentLog){
     int timeDiff = mktime(&currentLog)-mktime(&lastLog);
